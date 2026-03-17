@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>你当像鸟飞回这座山</title>
+    <style>
+        @font-face {
+            font-family: "XiangCuiKeSong";
+            src: url("xiangcuikesong.ttf") format("truetype");
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+            font-family: "XiangCuiKeSong", "PingFang SC", "Microsoft YaHei", sans-serif;
+            cursor: url('光标_48.png') 8 0, auto;
+        }
+
+        /* ===== 序幕场景 ===== */
+        #scene-prologue {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000;
+            z-index: 1;
+        }
+
+        #video-container {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+        }
+
+        #video-wrapper {
+            position: relative;
+            width: 100%; height: 100%;
+        }
+
+        #video-bg {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: contain;
+        }
+
+        #video-word {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: contain;
+            mix-blend-mode: multiply;
+            pointer-events: none;
+            opacity: 1;
+            transition: opacity 1.5s ease;
+        }
+
+        #video-word.fade-out {
+            opacity: 0;
+        }
+
+        #btn-start {
+            position: absolute;
+            bottom: 6%;
+            left: 6%;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1.2s ease-in-out;
+            z-index: 10;
+        }
+
+        #btn-start.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #btn-start.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #btn-start img {
+            width: 140px;
+            height: auto;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
+            transition: transform 0.2s ease, filter 0.2s ease;
+        }
+
+        #btn-start:hover img {
+            transform: scale(1.08);
+            filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.7));
+        }
+
+        #btn-start:active img {
+            transform: scale(0.96);
+        }
+
+        /* ===== 章节标题（通用） ===== */
+        #chapter-title {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 2s ease;
+            background: transparent;
+        }
+
+        #chapter-title.show {
+            opacity: 1;
+        }
+
+        #chapter-title.fade-out {
+            opacity: 0;
+        }
+
+        #chapter-title span {
+            font-family: "XiangCuiKeSong", serif;
+            font-size: 8rem;
+            color: #fff;
+            letter-spacing: 0.5em;
+            text-indent: 0.5em;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+        }
+
+        /* ===== 序章场景播放器 ===== */
+        #scene-chapter {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000;
+            z-index: 2;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1.5s ease;
+        }
+
+        #scene-chapter.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #scene-chapter video,
+        #scene-chapter > img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        #scene-image {
+            display: none;
+            position: absolute;
+            top: 0; left: 0;
+        }
+
+        #scene-image.cover {
+            object-fit: cover;
+        }
+
+        /* ===== 叠加图层 ===== */
+        #scene-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: auto;
+            height: 45%;
+            object-fit: contain;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+            z-index: 5;
+            pointer-events: none;
+            display: none;
+        }
+
+        #scene-overlay.show {
+            opacity: 1;
+        }
+
+        /* ===== 对话层 ===== */
+        #dialogue-layer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 45%;
+            display: flex;
+            align-items: flex-end;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        #dialogue-layer.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #dialogue-portrait {
+            height: 90%;
+            width: auto;
+            object-fit: contain;
+            flex-shrink: 0;
+            margin-left: 2%;
+        }
+
+        #dialogue-box {
+            position: relative;
+            flex: 1;
+            height: 55%;
+            margin-right: 2%;
+            margin-bottom: 2%;
+        }
+
+        #dialogue-bg {
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+            border-radius: 4px;
+        }
+
+        #dialogue-text {
+            position: absolute;
+            top: 18%;
+            left: 6%;
+            right: 6%;
+            bottom: 12%;
+            font-family: "XiangCuiKeSong", serif;
+            font-size: 1.6rem;
+            color: #3a2e1a;
+            line-height: 1.8;
+            overflow: hidden;
+            display: flex;
+            gap: 0.6em;
+        }
+
+        .dialogue-name {
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .dialogue-content {
+            flex: 1;
+        }
+
+        /* ===== 旁白文字层 ===== */
+        #narration-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10% 15%;
+            font-family: "XiangCuiKeSong", serif;
+            font-size: 1.8rem;
+            color: #fff;
+            line-height: 2.2;
+            text-align: center;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+            opacity: 0;
+            transition: opacity 1.5s ease;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        #narration-overlay.show {
+            opacity: 1;
+        }
+
+        /* ===== 点击开始提示 ===== */
+        #tap-to-start {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            cursor: pointer;
+        }
+
+        #tap-to-start span {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.2rem;
+            letter-spacing: 0.3em;
+            animation: breathe 2.5s ease-in-out infinite;
+        }
+
+        @keyframes breathe {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        .fade-out-overlay {
+            animation: fadeOutOverlay 1s ease forwards;
+        }
+
+        @keyframes fadeOutOverlay {
+            to { opacity: 0; visibility: hidden; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="tap-to-start">
+        <span>点击屏幕开始</span>
+    </div>
+
+    <!-- 序幕：背景视频 + 文字视频 + 开始按钮 -->
+    <div id="scene-prologue">
+        <div id="video-container">
+            <div id="video-wrapper">
+                <video id="video-bg" muted playsinline preload="auto" loop>
+                    <source src="0.mp4" type="video/mp4">
+                </video>
+                <video id="video-word" muted playsinline preload="auto">
+                    <source src="0_word.mp4" type="video/mp4">
+                </video>
+            </div>
+        </div>
+        <div id="btn-start">
+            <img src="初始画面-开始按键.png" alt="开始">
+        </div>
+    </div>
+
+    <!-- 章节标题（浮在所有场景之上） -->
+    <div id="chapter-title">
+        <span>序章</span>
+    </div>
+
+    <!-- 序章场景：依次播放过场视频 -->
+    <div id="scene-chapter">
+        <video id="video-scene" muted playsinline preload="auto">
+        </video>
+        <img id="scene-image" src="" alt="">
+        <!-- 对话层 -->
+        <div id="dialogue-layer">
+            <img id="dialogue-portrait" src="主控半身.png" alt="">
+            <div id="dialogue-box">
+                <img id="dialogue-bg" src="对话框_当代.png" alt="">
+                <div id="dialogue-text"></div>
+            </div>
+        </div>
+        <!-- 旁白文字层 -->
+        <div id="narration-overlay"></div>
+        <!-- 叠加图层（捧香等） -->
+        <img id="scene-overlay" src="" alt="">
+    </div>
+
+    <script>
+        (function () {
+            var tapOverlay = document.getElementById('tap-to-start');
+            var videoBg = document.getElementById('video-bg');
+            var videoWord = document.getElementById('video-word');
+            var btnStart = document.getElementById('btn-start');
+            var chapterTitle = document.getElementById('chapter-title');
+            var sceneChapter = document.getElementById('scene-chapter');
+            var videoScene = document.getElementById('video-scene');
+            var sceneImage = document.getElementById('scene-image');
+            var dialogueLayer = document.getElementById('dialogue-layer');
+            var dialoguePortrait = document.getElementById('dialogue-portrait');
+            var dialogueText = document.getElementById('dialogue-text');
+            var narrationOverlay = document.getElementById('narration-overlay');
+            var sceneOverlay = document.getElementById('scene-overlay');
+
+            var narrationActive = false;
+
+            // 对话队列
+            var dialogueLines = [
+                '父亲 【娃娃你回来了！】',
+                '弟弟 【姐姐！】',
+                '我 【你啊，不见半年，又窜高了这么大一截。】'
+            ];
+            var dialogueIndex = 0;
+            var isTyping = false;
+            var typeTimer = null;
+            var currentFullText = '';
+            var dialogueActive = false;
+            var onDialogueEnd = null;
+            var onLineShow = null;
+
+            // 序章的过场队列（支持视频和图片）
+            var sceneItems = [
+                { type: 'video', src: '1.mp4' },
+                { type: 'video', src: '2.mp4' },
+                { type: 'video', src: '3.mp4' },
+                { type: 'image', src: '序章-主控的父亲和弟弟骑三轮车来接.png', duration: 3000 }
+            ];
+            var currentSceneIndex = 0;
+
+            // ---- 文字视频播完 → 出现开始按钮 ----
+            videoWord.addEventListener('ended', function () {
+                videoWord.pause();
+                btnStart.classList.add('show');
+            });
+
+            // ---- 点击开始 → 淡出 → 显示"序章" → 播放过场 ----
+            btnStart.addEventListener('click', function () {
+                videoWord.classList.add('fade-out');
+                btnStart.classList.add('fade-out');
+
+                // 1.5s后 "序章"淡入
+                setTimeout(function () {
+                    chapterTitle.classList.add('show');
+                }, 1500);
+
+                // 3.5s后 "序章"淡出，同时切到过场视频
+                setTimeout(function () {
+                    chapterTitle.classList.add('fade-out');
+                    startSceneVideos();
+                }, 5000);
+            });
+
+            // ---- 过场播放系统（支持视频和图片） ----
+            function startSceneVideos() {
+                currentSceneIndex = 0;
+                playSceneItem(sceneItems[currentSceneIndex]);
+            }
+
+            function playSceneItem(item) {
+                sceneChapter.classList.add('active');
+                if (item.type === 'video') {
+                    sceneImage.style.display = 'none';
+                    videoScene.style.display = '';
+                    videoScene.src = item.src;
+                    videoScene.load();
+                    videoScene.play().catch(function (e) {
+                        console.warn('过场视频播放失败:', e);
+                    });
+                } else if (item.type === 'image') {
+                    videoScene.pause();
+                    videoScene.style.display = 'none';
+                    sceneImage.src = item.src;
+                    sceneImage.style.display = 'block';
+                    setTimeout(function () {
+                        onDialogueEnd = function () {
+                            // 序章对话结束 → 黑幕 → 播放5.mp4
+                            dialogueLayer.classList.remove('show');
+                            setTimeout(function () {
+                                sceneImage.style.display = 'none';
+                                setTimeout(function () {
+                                    videoScene.style.display = '';
+                                    videoScene.src = '5.mp4';
+                                    videoScene.load();
+                                    videoScene.play().catch(function (e) {
+                                        console.warn('5.mp4播放失败:', e);
+                                    });
+                                }, 1500);
+                            }, 800);
+                        };
+                        startDialogue();
+                    }, item.duration);
+                }
+            }
+
+            function advanceScene() {
+                currentSceneIndex++;
+                if (currentSceneIndex < sceneItems.length) {
+                    playSceneItem(sceneItems[currentSceneIndex]);
+                } else {
+                    console.log('序章过场全部播放完毕');
+                }
+            }
+
+            videoScene.addEventListener('ended', function () {
+                if (videoScene.src.indexOf('5.mp4') !== -1) {
+                    // 5.mp4播完 → 显示家里底图 + 旁白文字
+                    showNarrationScene();
+                } else {
+                    advanceScene();
+                }
+            });
+
+            // ---- 旁白场景 ----
+            function showNarrationScene() {
+                videoScene.pause();
+                videoScene.style.display = 'none';
+                sceneImage.style.display = 'none';
+                var newImg = new Image();
+                newImg.onload = function () {
+                    sceneImage.src = newImg.src;
+                    sceneImage.style.display = 'block';
+                    narrationOverlay.textContent = '熟悉的温暖将你包裹其中，父母、弟弟的笑脸、厨房里飘出的香气、写着\u201c福\u201d字的灯笼、精美繁复的窗花……一切似乎都与过去一模一样。';
+                    setTimeout(function () {
+                        narrationOverlay.classList.add('show');
+                        narrationActive = true;
+                    }, 500);
+                };
+                newImg.src = '序章-主控家里-旁边底图.png';
+            }
+
+            // ---- 第一章场景 ----
+            function startChapter1() {
+                narrationActive = false;
+                narrationOverlay.classList.remove('show');
+                sceneImage.style.display = 'none';
+                // 预加载灵位图
+                var lingweiImg = new Image();
+                lingweiImg.onload = function () {
+                    sceneImage.src = lingweiImg.src;
+                    sceneImage.classList.add('cover');
+                    sceneImage.style.display = 'block';
+                    // 3秒后淡入捧香
+                    var xiangImg = new Image();
+                    xiangImg.onload = function () {
+                        setTimeout(function () {
+                            sceneOverlay.src = xiangImg.src;
+                            sceneOverlay.style.display = 'block';
+                            requestAnimationFrame(function () {
+                                sceneOverlay.classList.add('show');
+                            });
+                            // 捧香淡入后停留3秒，再出对话
+                            setTimeout(function () {
+                                dialogueLines = ['我 【爷爷……】'];
+                                onDialogueEnd = function () {
+                                    // 第一章灵位对话结束 → 视频通话场景
+                                    startVideoCallScene();
+                                };
+                                startDialogue();
+                            }, 3000);
+                        }, 3000);
+                    };
+                    xiangImg.src = '第一章-主控捧香.png';
+                };
+                lingweiImg.src = '第一章-祖父灵位大特写.png';
+            }
+
+            // ---- 视频通话场景 ----
+            function startVideoCallScene() {
+                // 隐藏对话层和叠加图
+                dialogueLayer.classList.remove('show');
+                sceneOverlay.classList.remove('show');
+                sceneOverlay.style.display = 'none';
+                sceneImage.classList.remove('cover');
+                sceneImage.style.display = 'none';
+
+                // 黑幕4秒
+                setTimeout(function () {
+                    // 预加载严肃表情
+                    var yansuImg = new Image();
+                    yansuImg.onload = function () {
+                        sceneImage.src = yansuImg.src;
+                        sceneImage.classList.add('cover');
+                        sceneImage.style.display = 'block';
+
+                        dialogueLines = [
+                            '祖父 【娃娃啊，我的身体不太行了，撑不到你回家看我了。】',
+                            '我 【您别这么说，我已经买了今天下午的火车，明天一大早就到了……】',
+                            '祖父 【（忽然严肃）娃娃，其实当你看到这段视频的时候，爷爷我已经去了——】',
+                            '我 【（破涕为笑）爷您又来劲了……】',
+                            '祖父 【我这个老倌，这一辈子没剩下几个钢镚，也某得大房子和大跑车留给你，我在老家留了一个本子，里面是我这辈子最宝贵的财富，世间的宝物都在其中，你去看看吧……】',
+                            '我 【这个本子到底藏在哪啊？老倌不会给我留了一道题吧？】'
+                        ];
+
+                        // 第4句（index 3）显示后切换底图为开心表情
+                        onLineShow = {
+                            4: function () {
+                                var kaixinImg = new Image();
+                                kaixinImg.onload = function () {
+                                    sceneImage.src = kaixinImg.src;
+                                };
+                                kaixinImg.src = '第一章-视频通话-开心表情.png';
+                            }
+                        };
+
+                        onDialogueEnd = function () {
+                            // 1. 隐藏对话层、底图、立绘
+                            dialogueLayer.classList.remove('show');
+                            dialoguePortrait.style.display = 'none';
+                            sceneImage.classList.remove('cover');
+                            sceneImage.style.display = 'none';
+
+                            // 2. 黑幕4秒
+                            setTimeout(function () {
+                                // 3. 底图切换为灵位大特写
+                                var lingweiImg = new Image();
+                                lingweiImg.onload = function () {
+                                    sceneImage.src = lingweiImg.src;
+                                    sceneImage.classList.add('cover');
+                                    sceneImage.style.display = 'block';
+
+                                    // 4. 浮现"解谜开始"大字
+                                    chapterTitle.classList.remove('fade-out');
+                                    chapterTitle.querySelector('span').textContent = '解谜开始';
+                                    chapterTitle.classList.add('show');
+
+                                    // 停留3秒后隐藏
+                                    setTimeout(function () {
+                                        chapterTitle.classList.add('fade-out');
+
+                                        // 淡出完成后（2s transition）显示对话
+                                        setTimeout(function () {
+                                            chapterTitle.classList.remove('show');
+                                            chapterTitle.classList.remove('fade-out');
+
+                                            // 5. 对话框淡入，显示解谜对话
+                                            dialogueLines = [
+                                                '我 【我需要找找看，这个老倌到底把本子藏哪了？】'
+                                            ];
+                                            onLineShow = null;
+                                            onDialogueEnd = function () {
+                                                console.log('解谜对话结束');
+                                            };
+                                            startDialogue();
+                                        }, 2000);
+                                    }, 3000);
+                                };
+                                lingweiImg.src = '第一章-解谜-房间全貌.png';
+                            }, 4000);
+                        };
+
+                        startDialogue();
+                    };
+                    yansuImg.src = '第一章-视频通话-严肃表情.png';
+                }, 4000);
+            }
+
+            // ---- 点击屏幕开始 ----
+            function startPlayback() {
+                tapOverlay.classList.add('fade-out-overlay');
+                setTimeout(function () {
+                    tapOverlay.style.display = 'none';
+                }, 1000);
+
+                videoBg.play().catch(function (e) {
+                    console.warn('背景视频播放失败:', e);
+                });
+                videoWord.play().catch(function (e) {
+                    console.warn('文字视频播放失败:', e);
+                });
+            }
+
+            tapOverlay.addEventListener('click', startPlayback);
+
+            // ---- 对话系统 ----
+            function startDialogue() {
+                dialogueActive = true;
+                dialogueIndex = 0;
+                dialogueLayer.classList.add('show');
+                fireLineCallback(0);
+                showDialogueLine(dialogueLines[dialogueIndex]);
+            }
+
+            function fireLineCallback(index) {
+                if (onLineShow && onLineShow[index]) {
+                    onLineShow[index]();
+                }
+            }
+
+            function showDialogueLine(text) {
+                // 解析 "名字 【内容】" 格式
+                var match = text.match(/^(.+?)\s*【(.+)】$/);
+                var name = '';
+                var content = text;
+                if (match) {
+                    name = match[1];
+                    content = match[2];
+                }
+
+                // 只有"我"说话时才显示主控立绘
+                dialoguePortrait.style.display = (name === '我') ? '' : 'none';
+
+                currentFullText = content;
+                dialogueText.innerHTML = '';
+
+                var nameSpan = document.createElement('span');
+                nameSpan.className = 'dialogue-name';
+                nameSpan.textContent = name ? name + '：' : '';
+
+                var contentSpan = document.createElement('span');
+                contentSpan.className = 'dialogue-content';
+                contentSpan.textContent = '';
+
+                dialogueText.appendChild(nameSpan);
+                dialogueText.appendChild(contentSpan);
+
+                isTyping = true;
+                var charIndex = 0;
+                typeTimer = setInterval(function () {
+                    charIndex++;
+                    contentSpan.textContent = content.slice(0, charIndex);
+                    if (charIndex >= content.length) {
+                        clearInterval(typeTimer);
+                        typeTimer = null;
+                        isTyping = false;
+                    }
+                }, 80);
+            }
+
+            function onDialogueClick() {
+                if (!dialogueActive) return;
+                if (isTyping) {
+                    // 打字中 → 立即显示完整文字
+                    clearInterval(typeTimer);
+                    typeTimer = null;
+                    isTyping = false;
+                    var contentSpan = dialogueText.querySelector('.dialogue-content');
+                    if (contentSpan) {
+                        contentSpan.textContent = currentFullText;
+                    } else {
+                        dialogueText.textContent = currentFullText;
+                    }
+                } else {
+                    // 已显示完 → 下一句
+                    dialogueIndex++;
+                    if (dialogueIndex < dialogueLines.length) {
+                        fireLineCallback(dialogueIndex);
+                        showDialogueLine(dialogueLines[dialogueIndex]);
+                    } else {
+                        // 对话结束
+                        dialogueActive = false;
+                        if (onDialogueEnd) {
+                            onDialogueEnd();
+                        }
+                    }
+                }
+            }
+
+            document.addEventListener('click', function () {
+                if (dialogueActive) {
+                    onDialogueClick();
+                } else if (narrationActive) {
+                    startChapter1();
+                }
+            });
+
+            window.addEventListener('load', function () {
+                var playPromise = videoBg.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(function () {
+                        tapOverlay.style.display = 'none';
+                        videoWord.play().catch(function () {});
+                    }).catch(function () {
+                        // 自动播放被阻止，等待用户点击
+                    });
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
