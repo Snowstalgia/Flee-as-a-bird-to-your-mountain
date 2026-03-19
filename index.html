@@ -24,7 +24,7 @@
             overflow: hidden;
             background: #000;
             font-family: "XiangCuiKeSong", "PingFang SC", "Microsoft YaHei", sans-serif;
-            cursor: url('光标_48.png') 8 0, auto;
+            cursor: url('images/光标_48.png') 8 0, auto;
         }
 
         /* ===== 序幕场景 ===== */
@@ -192,6 +192,102 @@
             opacity: 1;
         }
 
+        #scene-ui-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 11;
+            pointer-events: none;
+            display: none;
+        }
+
+        #scene-ui-layer.show {
+            display: block;
+        }
+
+        .scene-ui-group {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .scene-ui-group.is-centered {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-direction: column;
+            padding: 0 8vw;
+        }
+
+        .scene-ui-button {
+            pointer-events: auto;
+            border: 1px solid rgba(99, 70, 30, 0.18);
+            background: rgba(255, 248, 236, 0.92);
+            color: #5e4726;
+            border-radius: 999px;
+            font-family: "XiangCuiKeSong", serif;
+            cursor: pointer;
+            transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .scene-ui-button:hover {
+            transform: translateY(-1px);
+            background: rgba(255, 252, 245, 0.98);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+        }
+
+        .scene-ui-button.is-choice {
+            min-width: min(56vw, 420px);
+            padding: 0.85rem 1.5rem;
+            font-size: 1rem;
+            line-height: 1.45;
+        }
+
+        .scene-ui-group.is-bookshelf {
+            position: absolute;
+            inset: 0;
+        }
+
+        .scene-ui-group.is-fullscreen {
+            position: absolute;
+            inset: 0;
+        }
+
+        .scene-ui-button.is-book-hotspot {
+            position: absolute;
+            top: 28%;
+            left: 45.2%;
+            width: 8.2%;
+            height: 42%;
+            transform: translate(-50%, 0) rotate(-7deg);
+            border: none;
+            border-radius: 0.3rem;
+            background: transparent;
+            box-shadow: none;
+            color: transparent;
+        }
+
+        .scene-ui-button.is-book-hotspot:hover {
+            transform: translate(-50%, 0) rotate(-7deg);
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .scene-ui-button.is-fullscreen-hotspot {
+            position: absolute;
+            inset: 0;
+            border: none;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .scene-ui-button.is-fullscreen-hotspot:hover {
+            transform: none;
+            background: transparent;
+            box-shadow: none;
+        }
+
         /* ===== 对话层 ===== */
         #dialogue-layer {
             position: absolute;
@@ -316,6 +412,149 @@
         @keyframes fadeOutOverlay {
             to { opacity: 0; visibility: hidden; }
         }
+
+        .puzzle-panel {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .puzzle-response {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding-right: 0.35rem;
+            white-space: pre-line;
+            font-size: 1.15rem;
+            line-height: 1.8;
+        }
+
+        .puzzle-response.typing {
+            cursor: pointer;
+        }
+
+        .puzzle-response-image {
+            display: block;
+            max-width: 100%;
+            max-height: 180px;
+            margin: 0 auto 0.75rem;
+            object-fit: contain;
+            border-radius: 6px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+        }
+
+        .puzzle-response-image.is-book-cover {
+            max-height: 220px;
+            box-shadow: none;
+        }
+
+        .puzzle-response-image.is-page {
+            width: 100%;
+            max-height: 240px;
+            border-radius: 10px;
+            background: rgba(255, 250, 242, 0.48);
+        }
+
+        .puzzle-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .puzzle-action {
+            border: 1px solid rgba(99, 70, 30, 0.18);
+            background: rgba(255, 248, 236, 0.86);
+            color: #5e4726;
+            padding: 0.4rem 0.85rem;
+            border-radius: 999px;
+            font-family: inherit;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+
+        .puzzle-action:hover:not(:disabled) {
+            transform: translateY(-1px);
+            background: rgba(255, 252, 245, 0.98);
+        }
+
+        .puzzle-controls {
+            display: flex;
+            gap: 0.7rem;
+            align-items: stretch;
+        }
+
+        .puzzle-input {
+            flex: 1;
+            min-width: 0;
+            border: 1px solid rgba(99, 70, 30, 0.24);
+            border-radius: 10px;
+            padding: 0.75rem 0.9rem;
+            font-family: inherit;
+            font-size: 0.9rem;
+            color: #4b371d;
+            background: rgba(255, 252, 245, 0.94);
+            outline: none;
+        }
+
+        .puzzle-input:focus {
+            border-color: rgba(99, 70, 30, 0.48);
+            box-shadow: 0 0 0 3px rgba(175, 137, 84, 0.14);
+        }
+
+        .puzzle-submit {
+            border: none;
+            border-radius: 10px;
+            padding: 0 1.2rem;
+            background: #6d4f26;
+            color: #fff7eb;
+            font-family: inherit;
+            font-size: 0.9rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .puzzle-submit:disabled,
+        .puzzle-action:disabled,
+        .puzzle-input:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        #scene-overlay.puzzle-lock-overlay {
+            top: 17%;
+            right: 15%;
+            bottom: auto;
+            left: auto;
+            transform: none;
+            width: min(18vw, 152px);
+            height: auto;
+            filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.2));
+        }
+
+        @media (max-width: 768px) {
+            .puzzle-controls {
+                flex-direction: column;
+            }
+
+            .puzzle-submit {
+                min-height: 44px;
+            }
+
+            .scene-ui-button.is-choice {
+                min-width: 72vw;
+                font-size: 0.92rem;
+            }
+
+            .scene-ui-button.is-book-hotspot {
+                top: 30%;
+                left: 46%;
+                width: 11.5%;
+                height: 38%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -329,15 +568,15 @@
         <div id="video-container">
             <div id="video-wrapper">
                 <video id="video-bg" muted playsinline preload="auto" loop>
-                    <source src="0.mp4" type="video/mp4">
+                    <source src="videos/0.mp4" type="video/mp4">
                 </video>
                 <video id="video-word" muted playsinline preload="auto">
-                    <source src="0_word.mp4" type="video/mp4">
+                    <source src="videos/0_word.mp4" type="video/mp4">
                 </video>
             </div>
         </div>
         <div id="btn-start">
-            <img src="初始画面-开始按键.png" alt="开始">
+            <img src="images/初始画面-开始按键.png" alt="开始">
         </div>
     </div>
 
@@ -353,9 +592,9 @@
         <img id="scene-image" src="" alt="">
         <!-- 对话层 -->
         <div id="dialogue-layer">
-            <img id="dialogue-portrait" src="主控半身.png" alt="">
+            <img id="dialogue-portrait" src="images/主控半身.png" alt="">
             <div id="dialogue-box">
-                <img id="dialogue-bg" src="对话框_当代.png" alt="">
+                <img id="dialogue-bg" src="images/对话框_当代.png" alt="">
                 <div id="dialogue-text"></div>
             </div>
         </div>
@@ -363,11 +602,13 @@
         <div id="narration-overlay"></div>
         <!-- 叠加图层（捧香等） -->
         <img id="scene-overlay" src="" alt="">
+        <div id="scene-ui-layer"></div>
     </div>
 
     <script>
         (function () {
             var tapOverlay = document.getElementById('tap-to-start');
+            var scenePrologue = document.getElementById('scene-prologue');
             var videoBg = document.getElementById('video-bg');
             var videoWord = document.getElementById('video-word');
             var btnStart = document.getElementById('btn-start');
@@ -380,6 +621,7 @@
             var dialogueText = document.getElementById('dialogue-text');
             var narrationOverlay = document.getElementById('narration-overlay');
             var sceneOverlay = document.getElementById('scene-overlay');
+            var sceneUiLayer = document.getElementById('scene-ui-layer');
 
             var narrationActive = false;
 
@@ -396,6 +638,9 @@
             var dialogueActive = false;
             var onDialogueEnd = null;
             var onLineShow = null;
+            var introStage = 'tap';
+            var imageAssetRoot = 'images/';
+            var videoAssetRoot = 'videos/';
 
             // 序章的过场队列（支持视频和图片）
             var sceneItems = [
@@ -406,14 +651,69 @@
             ];
             var currentSceneIndex = 0;
 
+            function resolveImageAsset(src) {
+                if (!src) return '';
+                if (/^(?:https?:|data:|blob:|images\/)/i.test(src)) {
+                    return src;
+                }
+                return imageAssetRoot + src.replace(/^\.?[\\/]+/, '');
+            }
+
+            function resolveVideoAsset(src) {
+                if (!src) return '';
+                if (/^(?:https?:|data:|blob:|videos\/)/i.test(src)) {
+                    return src;
+                }
+                return videoAssetRoot + src.replace(/^\.?[\\/]+/, '');
+            }
+
+            function finishMainMenuIntro() {
+                if (introStage !== 'menu') return;
+
+                introStage = 'menu-ready';
+                videoWord.pause();
+                try {
+                    if (isFinite(videoWord.duration) && videoWord.duration > 0) {
+                        videoWord.currentTime = videoWord.duration;
+                    }
+                } catch (error) {}
+                btnStart.classList.add('show');
+            }
+
+            function enterMainMenu() {
+                if (introStage !== 'tap') return;
+
+                introStage = 'menu';
+                tapOverlay.classList.add('fade-out-overlay');
+                setTimeout(function () {
+                    tapOverlay.style.display = 'none';
+                }, 1000);
+
+                btnStart.classList.remove('show');
+                btnStart.classList.remove('fade-out');
+                videoWord.classList.remove('fade-out');
+                videoWord.pause();
+                videoWord.currentTime = 0;
+                videoBg.currentTime = 0;
+                videoBg.play().catch(function (e) {
+                    console.warn('背景视频播放失败:', e);
+                });
+                videoWord.play().catch(function (e) {
+                    console.warn('标题视频播放失败:', e);
+                });
+            }
+
             // ---- 文字视频播完 → 出现开始按钮 ----
             videoWord.addEventListener('ended', function () {
-                videoWord.pause();
-                btnStart.classList.add('show');
+                finishMainMenuIntro();
             });
 
             // ---- 点击开始 → 淡出 → 显示"序章" → 播放过场 ----
-            btnStart.addEventListener('click', function () {
+            btnStart.addEventListener('click', function (event) {
+                event.stopPropagation();
+                if (introStage !== 'menu-ready') return;
+
+                introStage = 'playing';
                 videoWord.classList.add('fade-out');
                 btnStart.classList.add('fade-out');
 
@@ -440,7 +740,7 @@
                 if (item.type === 'video') {
                     sceneImage.style.display = 'none';
                     videoScene.style.display = '';
-                    videoScene.src = item.src;
+                    videoScene.src = resolveVideoAsset(item.src);
                     videoScene.load();
                     videoScene.play().catch(function (e) {
                         console.warn('过场视频播放失败:', e);
@@ -448,7 +748,7 @@
                 } else if (item.type === 'image') {
                     videoScene.pause();
                     videoScene.style.display = 'none';
-                    sceneImage.src = item.src;
+                    sceneImage.src = resolveImageAsset(item.src);
                     sceneImage.style.display = 'block';
                     setTimeout(function () {
                         onDialogueEnd = function () {
@@ -458,7 +758,7 @@
                                 sceneImage.style.display = 'none';
                                 setTimeout(function () {
                                     videoScene.style.display = '';
-                                    videoScene.src = '5.mp4';
+                                    videoScene.src = resolveVideoAsset('5.mp4');
                                     videoScene.load();
                                     videoScene.play().catch(function (e) {
                                         console.warn('5.mp4播放失败:', e);
@@ -480,13 +780,16 @@
                 }
             }
 
-            videoScene.addEventListener('ended', function () {
+            function endCurrentVideo() {
                 if (videoScene.src.indexOf('5.mp4') !== -1) {
-                    // 5.mp4播完 → 显示家里底图 + 旁白文字
                     showNarrationScene();
                 } else {
                     advanceScene();
                 }
+            }
+
+            videoScene.addEventListener('ended', function () {
+                endCurrentVideo();
             });
 
             // ---- 旁白场景 ----
@@ -504,7 +807,7 @@
                         narrationActive = true;
                     }, 500);
                 };
-                newImg.src = '序章-主控家里-旁边底图.png';
+                newImg.src = resolveImageAsset('序章-主控家里-旁边底图.png');
             }
 
             // ---- 第一章场景 ----
@@ -538,9 +841,9 @@
                             }, 3000);
                         }, 3000);
                     };
-                    xiangImg.src = '第一章-主控捧香.png';
+                    xiangImg.src = resolveImageAsset('第一章-主控捧香.png');
                 };
-                lingweiImg.src = '第一章-祖父灵位大特写.png';
+                lingweiImg.src = resolveImageAsset('第一章-祖父灵位大特写.png');
             }
 
             // ---- 视频通话场景 ----
@@ -577,7 +880,7 @@
                                 kaixinImg.onload = function () {
                                     sceneImage.src = kaixinImg.src;
                                 };
-                                kaixinImg.src = '第一章-视频通话-开心表情.png';
+                                kaixinImg.src = resolveImageAsset('第一章-视频通话-开心表情.png');
                             }
                         };
 
@@ -617,38 +920,30 @@
                                             ];
                                             onLineShow = null;
                                             onDialogueEnd = function () {
-                                                console.log('解谜对话结束');
+                                                startPuzzle();
                                             };
                                             startDialogue();
                                         }, 2000);
                                     }, 3000);
                                 };
-                                lingweiImg.src = '第一章-解谜-房间全貌.png';
+                                lingweiImg.src = resolveImageAsset('第一章-解谜-房间全貌.png');
                             }, 4000);
                         };
 
                         startDialogue();
                     };
-                    yansuImg.src = '第一章-视频通话-严肃表情.png';
+                    yansuImg.src = resolveImageAsset('第一章-视频通话-严肃表情.png');
                 }, 4000);
             }
 
-            // ---- 点击屏幕开始 ----
-            function startPlayback() {
-                tapOverlay.classList.add('fade-out-overlay');
-                setTimeout(function () {
-                    tapOverlay.style.display = 'none';
-                }, 1000);
+            tapOverlay.addEventListener('click', function (event) {
+                event.stopPropagation();
+                enterMainMenu();
+            });
 
-                videoBg.play().catch(function (e) {
-                    console.warn('背景视频播放失败:', e);
-                });
-                videoWord.play().catch(function (e) {
-                    console.warn('文字视频播放失败:', e);
-                });
-            }
-
-            tapOverlay.addEventListener('click', startPlayback);
+            scenePrologue.addEventListener('click', function () {
+                finishMainMenuIntro();
+            });
 
             // ---- 对话系统 ----
             function startDialogue() {
@@ -735,6 +1030,14 @@
             }
 
             document.addEventListener('click', function () {
+
+                // 如果正在播放视频 → 点击跳过
+                if (!dialogueActive && !narrationActive && sceneChapter.classList.contains('active') && videoScene.style.display !== 'none') {
+                    videoScene.pause();
+                    endCurrentVideo();
+                    return;
+                }
+
                 if (dialogueActive) {
                     onDialogueClick();
                 } else if (narrationActive) {
@@ -743,16 +1046,675 @@
             });
 
             window.addEventListener('load', function () {
-                var playPromise = videoBg.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(function () {
-                        tapOverlay.style.display = 'none';
-                        videoWord.play().catch(function () {});
-                    }).catch(function () {
-                        // 自动播放被阻止，等待用户点击
+                videoBg.pause();
+                videoWord.pause();
+                videoBg.currentTime = 0;
+                videoWord.currentTime = 0;
+            });
+
+            // ===== 解谜系统 =====
+            var puzzleState = {};
+            var puzzleTypingTimer = null;
+            var puzzlePending = false;
+            var puzzleSceneSnapshot = null;
+            var puzzleLastInput = '';
+            var puzzleAdvanceHandler = null;
+            var puzzleEndpoint = 'https://zgmzlb.pythonanywhere.com/api/puzzle1';
+            var puzzleIntroText = '【我】我需要找找看，这个老倌到底把本子藏哪了？';
+            var puzzleCgMap = {
+                cg_bookshelf: '第一章-解谜-书柜.jpg',
+                cg_drawer: '第一章-解谜-抽屉里的字条.png',
+                cg_nightstand: '第一章-解谜-床头柜-打开.png'
+            };
+            var notebookPages = [
+                {
+                    image: '第一章-解谜-书页-离谱传说.png',
+                    text: 'Part1\n第一版：（秦始皇给后人留下的遗诏，说在某村给后人留下了财宝无数，关键时刻可以改变历史轨迹……）\n第二版：（曹操在死后把尸体分成了七十二块分别埋葬，目的竟是……）\n【我】我的天，爷爷你还信这些吗……',
+                    actionLabel: '继续翻页'
+                },
+                {
+                    image: '第一章-解谜-书页-不要迷信.png',
+                    text: '翻到最后写着：根据本人亲测，以上皆为虚妄，相信科学，远离迷信，好好读书，努力赚钱。',
+                    actionLabel: '继续翻页'
+                },
+                {
+                    image: '第一章-解谜-书页-登月.png',
+                    text: 'Part2\n据村里老人口述，当时美国登月以后，阿姆斯特朗从月球上端下来一架外星人的飞碟，让美国专家焦头烂额。本村一位去美国务工的小伙听闻此事，连夜潜入NASA，将此物转运回中国。奈何他回国后跟外省的女人私奔，飞碟后来就存放在了嘎嘎村。\n【我】什么东西？？？',
+                    actionLabel: '继续翻页'
+                },
+                {
+                    image: '第一章-老照片.png',
+                    text: 'Part3\n翻到一张老照片：照片是黑白色的，因为年代久远而泛黄模糊，上面有几个农民穿着的人，围着一台机器。奇怪的是，这台机器无论是形状还是材质，都无法从现实中找到相似物。\n【我】这座山……我认得。',
+                    actionLabel: '翻到背面'
+                },
+                {
+                    image: '第一章-解谜-本子-照片背面.png',
+                    text: '照片后面写着：终有一日，它会回到天上去——嘎嘎村',
+                    actionLabel: '合上本子'
+                }
+            ];
+
+            function stopPuzzleTyping() {
+                if (puzzleTypingTimer) {
+                    clearInterval(puzzleTypingTimer);
+                    puzzleTypingTimer = null;
+                }
+            }
+
+            function escapeHtml(text) {
+                return String(text || '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            }
+
+            function stripPuzzleDialogueQuotes(text) {
+                return String(text || '')
+                    .replace(/^[「“]+/, '')
+                    .replace(/[」”]+$/, '');
+            }
+
+            function parsePuzzleLine(line) {
+                var trimmed = String(line || '').trim();
+                if (!trimmed) {
+                    return {
+                        speaker: '',
+                        text: '',
+                        spoken: false
+                    };
+                }
+
+                trimmed = trimmed
+                    .replace(/【主控】/g, '【我】')
+                    .replace(/主控/g, '我');
+
+                var match = trimmed.match(/^([^：\n]+)：(.+)$/);
+                if (match) {
+                    return {
+                        speaker: match[1].trim(),
+                        text: match[1].trim() + '：' + stripPuzzleDialogueQuotes(match[2].trim()),
+                        spoken: true
+                    };
+                }
+
+                match = trimmed.match(/^【([^】]+)】\s*(.+)$/);
+                if (!match) {
+                    match = trimmed.match(/^([^【\n：]+?)\s*【(.+)】$/);
+                }
+
+                if (match) {
+                    return {
+                        speaker: match[1],
+                        text: match[1] + '：' + stripPuzzleDialogueQuotes(match[2]),
+                        spoken: true
+                    };
+                }
+
+                return {
+                    speaker: '',
+                    text: trimmed.replace(/[【】]/g, ''),
+                    spoken: false
+                };
+            }
+
+            function normalizePuzzleText(text) {
+                return String(text || '')
+                    .split('\n')
+                    .map(function (line) {
+                        return parsePuzzleLine(line).text;
+                    })
+                    .join('\n');
+            }
+
+            function analyzePuzzleText(text) {
+                var hasVisibleText = false;
+                var showPortrait = false;
+
+                String(text || '').split('\n').forEach(function (line) {
+                    var parsed = parsePuzzleLine(line);
+                    if (!parsed.text) return;
+
+                    hasVisibleText = true;
+                    if (parsed.speaker === '我') {
+                        showPortrait = true;
+                    }
+                });
+
+                return {
+                    hasVisibleText: hasVisibleText,
+                    showPortrait: showPortrait
+                };
+            }
+
+            function resolvePuzzleCg(cgName) {
+                if (!cgName) return '';
+                return puzzleCgMap[cgName] || cgName;
+            }
+
+            function resolvePuzzleSceneImage(data) {
+                if (data && data.cg) {
+                    return resolvePuzzleCg(data.cg);
+                }
+
+                if (/床铺|被窝|枕头/.test(puzzleLastInput)) {
+                    return '第一章-解谜-床铺.png';
+                }
+
+                if (/衣柜|衣橱|衣服/.test(puzzleLastInput)) {
+                    return '第一章-解谜-衣柜.jpg';
+                }
+
+                if (/抽屉|拉柜/.test(puzzleLastInput)) {
+                    return '第一章-解谜-抽屉特写-打开.png';
+                }
+
+                if (/床头柜|床头/.test(puzzleLastInput)) {
+                    return '第一章-解谜-床头柜-打开.png';
+                }
+
+                return '';
+            }
+
+            function rememberPuzzleSceneSnapshot() {
+                puzzleSceneSnapshot = {
+                    src: sceneImage.getAttribute('src') || '',
+                    display: sceneImage.style.display || '',
+                    isCover: sceneImage.classList.contains('cover')
+                };
+            }
+
+            function setSceneImageSource(src) {
+                if (!src) return;
+
+                sceneImage.onerror = null;
+
+                var candidates;
+                if (/\.(png|jpg|jpeg|webp)$/i.test(src)) {
+                    candidates = [resolveImageAsset(src)];
+                } else {
+                    candidates = [
+                        resolveImageAsset(src + '.png'),
+                        resolveImageAsset(src + '.jpg'),
+                        resolveImageAsset(src + '.jpeg'),
+                        resolveImageAsset(src + '.webp')
+                    ];
+                }
+
+                var candidateIndex = 0;
+                sceneImage.src = candidates[candidateIndex];
+                sceneImage.onerror = function () {
+                    candidateIndex += 1;
+                    if (candidateIndex < candidates.length) {
+                        sceneImage.src = candidates[candidateIndex];
+                        return;
+                    }
+                    sceneImage.onerror = null;
+                };
+            }
+
+            function showPuzzleSceneImage(src, useCover) {
+                videoScene.pause();
+                videoScene.style.display = 'none';
+                sceneOverlay.classList.remove('show');
+                sceneOverlay.classList.remove('puzzle-lock-overlay');
+                sceneOverlay.style.display = 'none';
+                sceneOverlay.src = '';
+                sceneImage.classList.toggle('cover', !!useCover);
+                sceneImage.style.display = 'block';
+                setSceneImageSource(src);
+            }
+
+            function clearSceneUi() {
+                if (!sceneUiLayer) return;
+                sceneUiLayer.classList.remove('show');
+                sceneUiLayer.innerHTML = '';
+            }
+
+            function renderSceneActions(actions, groupClass, dataAttrName) {
+                return (actions || []).map(function (item, index) {
+                    var label = item.label || '';
+                    var ariaLabel = item.ariaLabel || label;
+                    return '<button class="scene-ui-button ' + escapeHtml(item.className || '') + '" type="button" ' + dataAttrName + '="' + index + '" aria-label="' + escapeHtml(ariaLabel) + '" title="' + escapeHtml(ariaLabel) + '">' + escapeHtml(label) + '</button>';
+                }).join('');
+            }
+
+            function bindSceneActions(actions, dataAttrName) {
+                var selector = '[' + dataAttrName + ']';
+                var buttons = sceneUiLayer.querySelectorAll(selector);
+                Array.prototype.forEach.call(buttons, function (button) {
+                    button.onclick = function (event) {
+                        event.stopPropagation();
+                        var index = Number(button.getAttribute(dataAttrName));
+                        if (actions[index] && typeof actions[index].onClick === 'function') {
+                            actions[index].onClick();
+                        }
+                    };
+                });
+            }
+
+            function showSceneUi(actions, groupClass) {
+                if (!sceneUiLayer || !actions || !actions.length) {
+                    clearSceneUi();
+                    return;
+                }
+
+                var attr = 'data-scene-action';
+                sceneUiLayer.innerHTML = '<div class="scene-ui-group ' + escapeHtml(groupClass || 'is-centered') + '">' + renderSceneActions(actions, groupClass, attr) + '</div>';
+                sceneUiLayer.classList.add('show');
+                bindSceneActions(actions, attr);
+            }
+
+            function showPuzzleOverlay(src, overlayClass) {
+                if (!src) return;
+
+                sceneOverlay.classList.remove('show');
+                sceneOverlay.classList.remove('puzzle-lock-overlay');
+                if (overlayClass) {
+                    sceneOverlay.classList.add(overlayClass);
+                }
+                sceneOverlay.src = resolveImageAsset(src);
+                sceneOverlay.style.display = 'block';
+                requestAnimationFrame(function () {
+                    sceneOverlay.classList.add('show');
+                });
+            }
+
+            function restorePuzzleSceneSnapshot() {
+                if (!puzzleSceneSnapshot) return;
+
+                sceneOverlay.classList.remove('show');
+                sceneOverlay.classList.remove('puzzle-lock-overlay');
+                sceneOverlay.style.display = 'none';
+                sceneOverlay.src = '';
+                sceneImage.onerror = null;
+                sceneImage.classList.toggle('cover', !!puzzleSceneSnapshot.isCover);
+                sceneImage.setAttribute('src', puzzleSceneSnapshot.src || '');
+                sceneImage.style.display = puzzleSceneSnapshot.display || '';
+            }
+
+            function getPuzzleElements() {
+                return {
+                    box: document.getElementById('dialogue-text'),
+                    response: document.getElementById('puzzle-response'),
+                    input: document.getElementById('puzzle-input'),
+                    submit: document.getElementById('puzzle-btn'),
+                    actions: document.getElementById('puzzle-actions')
+                };
+            }
+
+            function setPuzzleControlsDisabled(disabled) {
+                var elements = getPuzzleElements();
+                if (elements.input) {
+                    elements.input.disabled = disabled;
+                }
+                if (elements.submit) {
+                    elements.submit.disabled = disabled;
+                    elements.submit.textContent = disabled ? '调查中…' : '调查';
+                }
+                if (elements.actions) {
+                    Array.prototype.forEach.call(elements.actions.querySelectorAll('.puzzle-action'), function (button) {
+                        button.disabled = disabled;
                     });
                 }
-            });
+            }
+
+            function typeTextBlock(target, text, clickTarget) {
+                if (!target) return;
+
+                stopPuzzleTyping();
+                target.textContent = '';
+
+                var fullText = String(text || '');
+                var index = 0;
+                var skipTarget = clickTarget || target;
+
+                skipTarget.classList.add('typing');
+                skipTarget.onclick = function (event) {
+                    event.stopPropagation();
+                    if (skipTarget.classList.contains('typing')) {
+                        stopPuzzleTyping();
+                        target.textContent = fullText;
+                        skipTarget.classList.remove('typing');
+                        return;
+                    }
+                    if (typeof puzzleAdvanceHandler === 'function') {
+                        var next = puzzleAdvanceHandler;
+                        puzzleAdvanceHandler = null;
+                        next();
+                    }
+                };
+
+                puzzleTypingTimer = setInterval(function () {
+                    index += 1;
+                    target.textContent = fullText.slice(0, index);
+                    if (index >= fullText.length) {
+                        stopPuzzleTyping();
+                        skipTarget.classList.remove('typing');
+                    }
+                }, 34);
+            }
+
+            function typePuzzleResponse(text) {
+                var response = document.getElementById('puzzle-response');
+                if (!response) return;
+
+                var normalizedText = normalizePuzzleText(text);
+                var textMeta = analyzePuzzleText(text);
+
+                dialoguePortrait.style.display = textMeta.showPortrait ? '' : 'none';
+                response.innerHTML = '';
+
+                var textBlock = document.createElement('div');
+                response.appendChild(textBlock);
+                typeTextBlock(textBlock, normalizedText, response);
+            }
+
+            function typePanelScene(options) {
+                if (options && options.image) {
+                    showPuzzleSceneImage(options.image, !!options.useCover);
+                }
+                typePuzzleResponse(options && options.text ? options.text : '');
+            }
+
+            function renderPuzzleResponse(data) {
+                var response = document.getElementById('puzzle-response');
+                if (!response) return;
+
+                clearSceneUi();
+                stopPuzzleTyping();
+                response.onclick = function (event) {
+                    event.stopPropagation();
+                };
+
+                var sceneSrc = resolvePuzzleSceneImage(data);
+                if (sceneSrc) {
+                    showPuzzleSceneImage(sceneSrc, false);
+                }
+
+                var content = data && data.content ? data.content : '【旁白】「房间静悄悄的。」';
+                if (data && data.cg === 'cg_nightstand') {
+                    content = '（木板写着：娃娃，别找了，爷爷没有私房钱。）\n【我】……无语子。';
+                }
+
+                typePuzzleResponse(content);
+            }
+
+            function renderPanelActions(actions, dataAttrName) {
+                return (actions || []).map(function (item, index) {
+                    return '<button class="puzzle-action" type="button" ' + dataAttrName + '="' + index + '">' + escapeHtml(item.label) + '</button>';
+                }).join('');
+            }
+
+            function bindPanelActions(actions, dataAttrName) {
+                var selector = '[' + dataAttrName + ']';
+                var buttons = document.querySelectorAll(selector);
+                Array.prototype.forEach.call(buttons, function (button) {
+                    button.onclick = function (event) {
+                        event.stopPropagation();
+                        var index = Number(button.getAttribute(dataAttrName));
+                        if (actions[index] && typeof actions[index].onClick === 'function') {
+                            actions[index].onClick();
+                        }
+                    };
+                });
+            }
+
+            function renderStoryPanel(options) {
+                dialogueActive = false;
+                puzzlePending = false;
+                stopPuzzleTyping();
+                clearSceneUi();
+                puzzleAdvanceHandler = options && typeof options.onAdvance === 'function' ? options.onAdvance : null;
+
+                var box = document.getElementById('dialogue-text');
+                box.style.overflowY = 'auto';
+                box.style.gap = '0';
+                var storyMeta = analyzePuzzleText(options && options.text ? options.text : '');
+
+                if (storyMeta.hasVisibleText) {
+                    dialogueLayer.classList.add('show');
+                    box.style.display = 'block';
+                    box.innerHTML = `
+                        <div class="puzzle-panel">
+                            <div id="puzzle-response" class="puzzle-response"></div>
+                            ${options.actions && options.actions.length ? '<div id="puzzle-actions" class="puzzle-actions">' + renderPanelActions(options.actions, 'data-panel-action') + '</div>' : ''}
+                        </div>
+                    `;
+
+                    if (options.actions && options.actions.length) {
+                        bindPanelActions(options.actions, 'data-panel-action');
+                    }
+
+                    typePanelScene(options);
+                } else {
+                    dialogueLayer.classList.remove('show');
+                    dialoguePortrait.style.display = 'none';
+                    box.style.display = 'none';
+                    box.innerHTML = '';
+                    if (options && options.image) {
+                        showPuzzleSceneImage(options.image, !!options.useCover);
+                    }
+                    if (options && typeof options.onAdvance === 'function' && (!options.sceneActions || !options.sceneActions.length)) {
+                        showSceneUi([
+                            {
+                                label: '',
+                                className: 'is-fullscreen-hotspot',
+                                onClick: function () {
+                                    var next = puzzleAdvanceHandler;
+                                    puzzleAdvanceHandler = null;
+                                    if (typeof next === 'function') {
+                                        next();
+                                    }
+                                }
+                            }
+                        ], 'is-fullscreen');
+                    }
+                }
+
+                if (options.sceneActions && options.sceneActions.length) {
+                    showSceneUi(options.sceneActions, options.sceneActionsClass);
+                }
+            }
+
+            function startBookshelfDiscoveryScene() {
+                renderStoryPanel({
+                    image: '第一章-解谜-书柜.jpg',
+                    text: '',
+                    sceneActionsClass: 'is-bookshelf',
+                    sceneActions: [
+                        {
+                            label: '',
+                            ariaLabel: '这辈子你不得不看的一本书',
+                            className: 'is-book-hotspot',
+                            onClick: startNotebookFoundScene
+                        }
+                    ]
+                });
+            }
+
+            function startNotebookFoundScene() {
+                renderStoryPanel({
+                    image: '第一章-解谜-本子正面.png',
+                    text: '（一个皮革本子，书脊上贴了一个标题：这辈子你不得不看的一本书。）\n（翻到正面，书腰上写着：多届诺贝尔文学奖读者亲撰。）\n【我】老倌你脸挺大的……',
+                    onAdvance: startNotebookPasswordScene
+                });
+            }
+
+            function startNotebookPasswordScene(feedbackText) {
+                renderStoryPanel({
+                    image: '第一章-解谜-本子正面.png',
+                    text: normalizePuzzleText(feedbackText || '【我】这个老顽童……还是不肯放过我。'),
+                    sceneActionsClass: 'is-centered',
+                    sceneActions: [
+                        {
+                            label: '祖父的生日 1950',
+                            className: 'is-choice',
+                            onClick: function () {
+                                startNotebookPasswordScene('【我】不是这个，开不了。');
+                            }
+                        },
+                        {
+                            label: '我的生日 2005',
+                            className: 'is-choice',
+                            onClick: function () {
+                                startNotebookPasswordScene('【我】不是这个，开不了。');
+                            }
+                        },
+                        {
+                            label: '老倌你是个什么人我还能不知道吗？0000',
+                            className: 'is-choice',
+                            onClick: unlockNotebook
+                        }
+                    ]
+                });
+                showPuzzleOverlay('第一章-锁的特写.jpg', 'puzzle-lock-overlay');
+            }
+
+            function unlockNotebook() {
+                renderStoryPanel({
+                    image: '第一章-解谜-本子正面.png',
+                    text: '【我】我就知道……',
+                    onAdvance: function () {
+                        startNotebookPage(0);
+                    }
+                });
+                showPuzzleOverlay('第一章-锁的特写.jpg', 'puzzle-lock-overlay');
+            }
+
+            function startNotebookPage(index) {
+                var page = notebookPages[index];
+                if (!page) {
+                    finishNotebookSequence();
+                    return;
+                }
+
+                renderStoryPanel({
+                    image: page.image,
+                    text: page.text,
+                    onAdvance: index + 1 < notebookPages.length ? function () {
+                        startNotebookPage(index + 1);
+                    } : null
+                });
+            }
+
+            function finishNotebookSequence() {
+                stopPuzzleTyping();
+                puzzleAdvanceHandler = null;
+            }
+
+            function bindPuzzleEvents() {
+                var elements = getPuzzleElements();
+                if (!elements.input || !elements.submit) return;
+
+                elements.submit.onclick = function (event) {
+                    event.stopPropagation();
+                    submitPuzzle();
+                };
+
+                elements.input.onkeydown = function (event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        submitPuzzle();
+                    }
+                };
+
+            }
+
+            function startPuzzle() {
+                dialogueActive = false;
+                puzzleState = {};
+                puzzlePending = false;
+                stopPuzzleTyping();
+                clearSceneUi();
+                rememberPuzzleSceneSnapshot();
+                dialogueLayer.classList.add('show');
+
+                var box = document.getElementById('dialogue-text');
+                box.style.display = 'block';
+                box.style.overflowY = 'auto';
+                box.style.gap = '0';
+                box.innerHTML = `
+                    <div class="puzzle-panel">
+                        <div id="puzzle-response" class="puzzle-response"></div>
+                        <div class="puzzle-controls">
+                            <input id="puzzle-input" class="puzzle-input" type="text" autocomplete="off" placeholder="比如：我要调查书柜">
+                            <button id="puzzle-btn" class="puzzle-submit" type="button">调查</button>
+                        </div>
+                    </div>
+                `;
+
+                bindPuzzleEvents();
+                typePuzzleResponse(puzzleIntroText);
+
+                var input = document.getElementById('puzzle-input');
+                if (input) {
+                    input.focus();
+                }
+            }
+
+            function submitPuzzle(forcedInput) {
+                if (puzzlePending) return;
+
+                var elements = getPuzzleElements();
+                if (!elements.input) return;
+
+                var input = (typeof forcedInput === 'string' ? forcedInput : elements.input.value).trim();
+                if (!input) {
+                    elements.input.focus();
+                    return;
+                }
+
+                puzzleLastInput = input;
+                elements.input.value = input;
+                puzzlePending = true;
+                setPuzzleControlsDisabled(true);
+
+                fetch(puzzleEndpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        input: input,
+                        state: puzzleState
+                    })
+                })
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error('HTTP ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(function (data) {
+                    if (data && data.state && typeof data.state === 'object') {
+                        Object.keys(data.state).forEach(function (key) {
+                            puzzleState[key] = data.state[key];
+                        });
+                    }
+                    handlePuzzleResponse(data || {});
+                })
+                .catch(function (error) {
+                    console.error('Puzzle request failed:', error);
+                    typePuzzleResponse('调查没有连上服务器，请稍后再试。');
+                })
+                .finally(function () {
+                    puzzlePending = false;
+                    setPuzzleControlsDisabled(false);
+                });
+            }
+
+            function handlePuzzleResponse(data) {
+                if (data.type === 'success') {
+                    setPuzzleControlsDisabled(true);
+                    setTimeout(function () {
+                        startBookshelfDiscoveryScene();
+                    }, 300);
+                    return;
+                }
+
+                renderPuzzleResponse(data);
+            }
         })();
     </script>
 </body>
