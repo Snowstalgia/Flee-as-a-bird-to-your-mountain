@@ -1,0 +1,16 @@
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editor / IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Local temp / exported reference files
+_scene_notes.docx
+_storyboard_26_37.pdf
+*.log
