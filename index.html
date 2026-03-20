@@ -172,6 +172,20 @@
             object-fit: cover;
         }
 
+        #scene-image.is-zoom-in {
+            animation: sceneImageZoomIn 0.85s ease forwards;
+            transform-origin: center center;
+        }
+
+        @keyframes sceneImageZoomIn {
+            from {
+                transform: scale(1);
+            }
+            to {
+                transform: scale(1.14);
+            }
+        }
+
         /* ===== 叠加图层 ===== */
         #scene-overlay {
             position: absolute;
@@ -1059,6 +1073,7 @@
             var puzzleSceneSnapshot = null;
             var puzzleLastInput = '';
             var puzzleAdvanceHandler = null;
+            var puzzleSceneReturnHandler = null;
             var puzzleEndpoint = 'https://zgmzlb.pythonanywhere.com/api/puzzle1';
             var puzzleIntroText = '【我】我需要找找看，这个老倌到底把本子藏哪了？';
             var puzzleCgMap = {
@@ -1084,7 +1099,46 @@
                 },
                 {
                     image: '第一章-老照片.png',
-                    text: 'Part3\n翻到一张老照片：照片是黑白色的，因为年代久远而泛黄模糊，上面有几个农民穿着的人，围着一台机器。奇怪的是，这台机器无论是形状还是材质，都无法从现实中找到相似物。\n【我】这座山……我认得。',
+                    text: '【我】这座山……我认得。',
+                    actionLabel: '翻到背面'
+                },
+                {
+                    image: '第一章-解谜-本子-照片背面.png',
+                    text: '照片后面写着：终有一日，它会回到天上去——嘎嘎村',
+                    actionLabel: '合上本子'
+                }
+            ];
+
+            notebookPages = [
+                {
+                    image: '第一章-解谜-书页-离谱传说.png',
+                    text: 'Part1\n第一版：（秦始皇给后人留下的遗产，说在某村给后人留下了财宝无数，关键时刻可以改变历史轨迹……）\n第二版：（曹操在死后把尸体分成了七十二块分别埋葬，目的竟是……）\n【我】我的天，爷爷你还信这些呢……',
+                    sceneText: '【我】我的天……爷爷你还信这些吗？',
+                    actionLabel: '继续翻页'
+                },
+                {
+                    image: '第一章-解谜-书页-不要迷信.png',
+                    text: '翻到最后写着：根据本人亲测，以上皆为虚妄，相信科学，远离迷信，好好读书，努力赚钱。',
+                    actionLabel: '继续翻页'
+                },
+                {
+                    image: '第一章-解谜-书页-登月.png',
+                    text: 'Part2\n据村里老人们口述，当时美国登月以后，阿姆斯特朗从月球上拆下来一架外星人的飞碟，让美国专家焦头烂额。本村一位去美国务工的小伙听闻此事，连夜潜入NASA，将此物转运回中国。奈何他回国后跟外村的女人私奔，飞碟后来就存放在了嘎嘎村。\n【我】什么东西？？？',
+                    sceneText: '【我】什么东西？？？',
+                    actionLabel: '继续翻页'
+                },
+                {
+                    image: '第一章-老照片在书中.jpg',
+                    actionLabel: '继续翻页'
+                },
+                {
+                    image: '第一章-老照片.png',
+                    actionLabel: '仔细看看'
+                },
+                {
+                    image: '第一章-老照片.png',
+                    imageClass: 'is-zoom-in',
+                    sceneText: '【我】这座山……我认得。',
                     actionLabel: '翻到背面'
                 },
                 {
@@ -1221,8 +1275,30 @@
                 puzzleSceneSnapshot = {
                     src: sceneImage.getAttribute('src') || '',
                     display: sceneImage.style.display || '',
-                    isCover: sceneImage.classList.contains('cover')
+                    className: sceneImage.className || ''
                 };
+            }
+
+            function clearPuzzleSceneReturn() {
+                puzzleSceneReturnHandler = null;
+                sceneChapter.onclick = null;
+                sceneImage.onclick = null;
+            }
+
+            function enablePuzzleSceneReturn() {
+                if (!puzzleSceneSnapshot || !puzzleSceneSnapshot.src) {
+                    clearPuzzleSceneReturn();
+                    return;
+                }
+
+                puzzleSceneReturnHandler = function (event) {
+                    if (event) {
+                        event.stopPropagation();
+                    }
+                    restorePuzzleSceneSnapshot();
+                };
+                sceneChapter.onclick = puzzleSceneReturnHandler;
+                sceneImage.onclick = puzzleSceneReturnHandler;
             }
 
             function setSceneImageSource(src) {
@@ -1254,14 +1330,21 @@
                 };
             }
 
-            function showPuzzleSceneImage(src, useCover) {
+            function showPuzzleSceneImage(src, useCover, imageClass) {
                 videoScene.pause();
                 videoScene.style.display = 'none';
+                clearPuzzleSceneReturn();
                 sceneOverlay.classList.remove('show');
                 sceneOverlay.classList.remove('puzzle-lock-overlay');
                 sceneOverlay.style.display = 'none';
                 sceneOverlay.src = '';
-                sceneImage.classList.toggle('cover', !!useCover);
+                sceneImage.className = '';
+                if (useCover) {
+                    sceneImage.classList.add('cover');
+                }
+                if (imageClass) {
+                    sceneImage.classList.add(imageClass);
+                }
                 sceneImage.style.display = 'block';
                 setSceneImageSource(src);
             }
@@ -1324,12 +1407,13 @@
             function restorePuzzleSceneSnapshot() {
                 if (!puzzleSceneSnapshot) return;
 
+                clearPuzzleSceneReturn();
                 sceneOverlay.classList.remove('show');
                 sceneOverlay.classList.remove('puzzle-lock-overlay');
                 sceneOverlay.style.display = 'none';
                 sceneOverlay.src = '';
                 sceneImage.onerror = null;
-                sceneImage.classList.toggle('cover', !!puzzleSceneSnapshot.isCover);
+                sceneImage.className = puzzleSceneSnapshot.className || '';
                 sceneImage.setAttribute('src', puzzleSceneSnapshot.src || '');
                 sceneImage.style.display = puzzleSceneSnapshot.display || '';
             }
@@ -1413,7 +1497,7 @@
 
             function typePanelScene(options) {
                 if (options && options.image) {
-                    showPuzzleSceneImage(options.image, !!options.useCover);
+                    showPuzzleSceneImage(options.image, !!options.useCover, options.imageClass || '');
                 }
                 typePuzzleResponse(options && options.text ? options.text : '');
             }
@@ -1431,6 +1515,7 @@
                 var sceneSrc = resolvePuzzleSceneImage(data);
                 if (sceneSrc) {
                     showPuzzleSceneImage(sceneSrc, false);
+                    enablePuzzleSceneReturn();
                 }
 
                 var content = data && data.content ? data.content : '【旁白】「房间静悄悄的。」';
@@ -1494,7 +1579,7 @@
                     box.style.display = 'none';
                     box.innerHTML = '';
                     if (options && options.image) {
-                        showPuzzleSceneImage(options.image, !!options.useCover);
+                        showPuzzleSceneImage(options.image, !!options.useCover, options.imageClass || '');
                     }
                     if (options && typeof options.onAdvance === 'function' && (!options.sceneActions || !options.sceneActions.length)) {
                         showSceneUi([
@@ -1537,7 +1622,7 @@
             function startNotebookFoundScene() {
                 renderStoryPanel({
                     image: '第一章-解谜-本子正面.png',
-                    text: '（一个皮革本子，书脊上贴了一个标题：这辈子你不得不看的一本书。）\n（翻到正面，书腰上写着：多届诺贝尔文学奖读者亲撰。）\n【我】老倌你脸挺大的……',
+                    text: '【我】老倌你脸挺大的……',
                     onAdvance: startNotebookPasswordScene
                 });
             }
@@ -1569,7 +1654,7 @@
                         }
                     ]
                 });
-                showPuzzleOverlay('第一章-锁的特写.jpg', 'puzzle-lock-overlay');
+                showPuzzleOverlay('第一章-锁特写.png', 'puzzle-lock-overlay');
             }
 
             function unlockNotebook() {
@@ -1580,7 +1665,117 @@
                         startNotebookPage(0);
                     }
                 });
-                showPuzzleOverlay('第一章-锁的特写.jpg', 'puzzle-lock-overlay');
+                showPuzzleOverlay('第一章-锁特写.png', 'puzzle-lock-overlay');
+            }
+
+            function showNotebookPasswordChoices() {
+                renderStoryPanel({
+                    image: '第一章-锁特写.png',
+                    text: '',
+                    sceneActionsClass: 'is-centered',
+                    sceneActions: [
+                        {
+                            label: '祖父的生日 1950',
+                            className: 'is-choice',
+                            onClick: function () {
+                                startNotebookPasswordRetryScene();
+                            }
+                        },
+                        {
+                            label: '我的生日 2005',
+                            className: 'is-choice',
+                            onClick: function () {
+                                startNotebookPasswordRetryScene();
+                            }
+                        },
+                        {
+                            label: '老倌你是个什么人我还能不知道吗？0000',
+                            className: 'is-choice',
+                            onClick: unlockNotebook
+                        }
+                    ]
+                });
+            }
+
+            function startNotebookPasswordScene() {
+                renderStoryPanel({
+                    image: '第一章-锁特写.png',
+                    text: '【我】这个老顽童……还是不肯放过我。',
+                    onAdvance: showNotebookPasswordChoices
+                });
+            }
+
+            function startNotebookPasswordRetryScene() {
+                renderStoryPanel({
+                    image: '第一章-锁特写.png',
+                    text: '【我】不是这个，开不了。',
+                    onAdvance: showNotebookPasswordChoices
+                });
+            }
+
+            function unlockNotebook() {
+                renderStoryPanel({
+                    image: '第一章-锁特写.png',
+                    text: '【我】我就知道……',
+                    onAdvance: function () {
+                        startNotebookPage(0);
+                    }
+                });
+            }
+
+            function showNotebookPasswordChoices() {
+                renderStoryPanel({
+                    image: '第一章-锁特写.png',
+                    text: '',
+                    sceneActionsClass: 'is-centered',
+                    sceneActions: [
+                        {
+                            label: '祖父的生日 1950',
+                            className: 'is-choice',
+                            onClick: function () {
+                                startNotebookPasswordRetryScene();
+                            }
+                        },
+                        {
+                            label: '我的生日 2005',
+                            className: 'is-choice',
+                            onClick: function () {
+                                startNotebookPasswordRetryScene();
+                            }
+                        },
+                        {
+                            label: '老倌你是个什么人我还能不知道吗？0000',
+                            className: 'is-choice',
+                            onClick: unlockNotebook
+                        }
+                    ]
+                });
+            }
+
+            function startNotebookPasswordScene() {
+                renderStoryPanel({
+                    image: '第一章-锁特写.png',
+                    text: '【我】这个老顽童……还是不肯放过我。',
+                    onAdvance: showNotebookPasswordChoices
+                });
+            }
+
+            function startNotebookPasswordRetryScene() {
+                renderStoryPanel({
+                    image: '第一章-锁特写.png',
+                    text: '【我】不是这个，开不了。',
+                    onAdvance: showNotebookPasswordChoices
+                });
+            }
+
+            function unlockNotebook() {
+                renderStoryPanel({
+                    image: '第一章-锁特写.png',
+                    text: '【我】我就知道……',
+                    onAdvance: function () {
+                        startNotebookPage(0);
+                    }
+                });
             }
 
             function startNotebookPage(index) {
@@ -1592,16 +1787,22 @@
 
                 renderStoryPanel({
                     image: page.image,
-                    text: page.text,
-                    onAdvance: index + 1 < notebookPages.length ? function () {
-                        startNotebookPage(index + 1);
-                    } : null
+                    imageClass: page.imageClass || '',
+                    text: page.sceneText || '',
+                    onAdvance: function () {
+                        if (index + 1 < notebookPages.length) {
+                            startNotebookPage(index + 1);
+                            return;
+                        }
+                        finishNotebookSequence();
+                    }
                 });
             }
 
             function finishNotebookSequence() {
                 stopPuzzleTyping();
                 puzzleAdvanceHandler = null;
+                clearSceneUi();
             }
 
             function bindPuzzleEvents() {
