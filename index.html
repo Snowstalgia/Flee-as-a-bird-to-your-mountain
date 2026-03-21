@@ -1074,6 +1074,7 @@
             var puzzleLastInput = '';
             var puzzleAdvanceHandler = null;
             var puzzleSceneReturnHandler = null;
+            var puzzleSceneSequence = null;
             var puzzleEndpoint = 'https://zgmzlb.pythonanywhere.com/api/puzzle1';
             var puzzleIntroText = '【我】我需要找找看，这个老倌到底把本子藏哪了？';
             var puzzleCgMap = {
@@ -1099,7 +1100,7 @@
                 },
                 {
                     image: '第一章-老照片.png',
-                    text: '【我】这座山……我认得。',
+                    text: '【我】这里……我认得。',
                     actionLabel: '翻到背面'
                 },
                 {
@@ -1271,6 +1272,40 @@
                 return '';
             }
 
+            function resolvePuzzleSceneSequence(data) {
+                if (data && data.cg === 'cg_drawer') {
+                    return [
+                        '第一章-解谜-抽屉特写-关上.png',
+                        '第一章-解谜-抽屉特写-打开.png',
+                        '第一章-解谜-抽屉里的字条.png'
+                    ];
+                }
+
+                if (data && data.cg === 'cg_nightstand') {
+                    return [
+                        '第一章-解谜-床头柜-关上.png',
+                        '第一章-解谜-床头柜-打开.png'
+                    ];
+                }
+
+                if (/抽屉|拉柜/.test(puzzleLastInput)) {
+                    return [
+                        '第一章-解谜-抽屉特写-关上.png',
+                        '第一章-解谜-抽屉特写-打开.png',
+                        '第一章-解谜-抽屉里的字条.png'
+                    ];
+                }
+
+                if (/床头柜|床头/.test(puzzleLastInput)) {
+                    return [
+                        '第一章-解谜-床头柜-关上.png',
+                        '第一章-解谜-床头柜-打开.png'
+                    ];
+                }
+
+                return null;
+            }
+
             function rememberPuzzleSceneSnapshot() {
                 puzzleSceneSnapshot = {
                     src: sceneImage.getAttribute('src') || '',
@@ -1280,6 +1315,7 @@
             }
 
             function clearPuzzleSceneReturn() {
+                puzzleSceneSequence = null;
                 puzzleSceneReturnHandler = null;
                 sceneChapter.onclick = null;
                 sceneImage.onclick = null;
@@ -1297,6 +1333,46 @@
                     }
                     restorePuzzleSceneSnapshot();
                 };
+                sceneChapter.onclick = puzzleSceneReturnHandler;
+                sceneImage.onclick = puzzleSceneReturnHandler;
+            }
+
+            function enablePuzzleSceneSequence(sequence, finalText) {
+                if (!puzzleSceneSnapshot || !puzzleSceneSnapshot.src || !sequence || !sequence.length) {
+                    enablePuzzleSceneReturn();
+                    return;
+                }
+
+                puzzleSceneSequence = {
+                    items: sequence.slice(),
+                    index: 0,
+                    finalText: finalText || '',
+                    finalTextShown: false
+                };
+
+                puzzleSceneReturnHandler = function (event) {
+                    if (event) {
+                        event.stopPropagation();
+                    }
+
+                    if (!puzzleSceneSequence) {
+                        restorePuzzleSceneSnapshot();
+                        return;
+                    }
+
+                    if (puzzleSceneSequence.index < puzzleSceneSequence.items.length - 1) {
+                        puzzleSceneSequence.index += 1;
+                        setSceneImageSource(puzzleSceneSequence.items[puzzleSceneSequence.index]);
+                        if (puzzleSceneSequence.index === puzzleSceneSequence.items.length - 1 && !puzzleSceneSequence.finalTextShown) {
+                            puzzleSceneSequence.finalTextShown = true;
+                            typePuzzleResponse(puzzleSceneSequence.finalText);
+                        }
+                        return;
+                    }
+
+                    restorePuzzleSceneSnapshot();
+                };
+
                 sceneChapter.onclick = puzzleSceneReturnHandler;
                 sceneImage.onclick = puzzleSceneReturnHandler;
             }
@@ -1512,15 +1588,25 @@
                     event.stopPropagation();
                 };
 
-                var sceneSrc = resolvePuzzleSceneImage(data);
-                if (sceneSrc) {
-                    showPuzzleSceneImage(sceneSrc, false);
-                    enablePuzzleSceneReturn();
-                }
-
+                var sceneSequence = resolvePuzzleSceneSequence(data);
+                var sceneSrc = sceneSequence && sceneSequence.length
+                    ? sceneSequence[0]
+                    : resolvePuzzleSceneImage(data);
                 var content = data && data.content ? data.content : '【旁白】「房间静悄悄的。」';
                 if (data && data.cg === 'cg_nightstand') {
                     content = '（木板写着：娃娃，别找了，爷爷没有私房钱。）\n【我】……无语子。';
+                }
+
+                if (sceneSrc) {
+                    showPuzzleSceneImage(sceneSrc, false);
+                    if (sceneSequence && sceneSequence.length > 1) {
+                        enablePuzzleSceneSequence(sceneSequence, content);
+                        typePuzzleResponse('');
+                    } else {
+                        enablePuzzleSceneReturn();
+                        typePuzzleResponse(content);
+                    }
+                    return;
                 }
 
                 typePuzzleResponse(content);
