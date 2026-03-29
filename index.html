@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>你当像鸟飞回这座山</title>
+    <link rel="preload" href="xiangcuikesong.woff2" as="font" type="font/woff2" crossorigin>
     <style>
         @font-face {
             font-family: "XiangCuiKeSong";
-            src: url("xiangcuikesong.ttf") format("truetype");
+            src: url("xiangcuikesong.woff2") format("woff2"),
+                 url("xiangcuikesong.ttf") format("truetype");
             font-weight: normal;
             font-style: normal;
+            font-display: swap;
         }
 
         * {
@@ -590,7 +593,7 @@
             </div>
         </div>
         <div id="btn-start">
-            <img src="images/初始画面-开始按键.png" alt="开始">
+            <img src="images/初始画面-开始按键.webp" alt="开始">
         </div>
     </div>
 
@@ -601,21 +604,21 @@
 
     <!-- 序章场景：依次播放过场视频 -->
     <div id="scene-chapter">
-        <video id="video-scene" muted playsinline preload="auto">
+        <video id="video-scene" muted playsinline preload="none">
         </video>
-        <img id="scene-image" src="" alt="">
+        <img id="scene-image" alt="">
         <!-- 对话层 -->
         <div id="dialogue-layer">
-            <img id="dialogue-portrait" src="images/主控半身.png" alt="">
+            <img id="dialogue-portrait" data-src="images/主控半身.webp" alt="">
             <div id="dialogue-box">
-                <img id="dialogue-bg" src="images/对话框_当代.png" alt="">
+                <img id="dialogue-bg" data-src="images/对话框_当代.webp" alt="">
                 <div id="dialogue-text"></div>
             </div>
         </div>
         <!-- 旁白文字层 -->
         <div id="narration-overlay"></div>
         <!-- 叠加图层（捧香等） -->
-        <img id="scene-overlay" src="" alt="">
+        <img id="scene-overlay" alt="">
         <div id="scene-ui-layer"></div>
     </div>
 
@@ -638,6 +641,20 @@
             var sceneUiLayer = document.getElementById('scene-ui-layer');
 
             var narrationActive = false;
+            var dialogueAssetsLoaded = false;
+
+            function loadDialogueAssets() {
+                if (dialogueAssetsLoaded) return;
+                dialogueAssetsLoaded = true;
+                var portrait = document.getElementById('dialogue-portrait');
+                var bg = document.getElementById('dialogue-bg');
+                if (portrait && portrait.dataset.src) {
+                    portrait.src = portrait.dataset.src;
+                }
+                if (bg && bg.dataset.src) {
+                    bg.src = bg.dataset.src;
+                }
+            }
 
             // 对话队列
             var dialogueLines = [
@@ -661,16 +678,17 @@
                 { type: 'video', src: '1.mp4' },
                 { type: 'video', src: '2.mp4' },
                 { type: 'video', src: '3.mp4' },
-                { type: 'image', src: '序章-主控的父亲和弟弟骑三轮车来接.png', duration: 3000 }
+                { type: 'image', src: '序章-主控的父亲和弟弟骑三轮车来接.webp', duration: 3000 }
             ];
             var currentSceneIndex = 0;
 
             function resolveImageAsset(src) {
                 if (!src) return '';
                 if (/^(?:https?:|data:|blob:|images\/)/i.test(src)) {
-                    return src;
+                    return src.replace(/\.(png|PNG)$/i, '.webp');
                 }
-                return imageAssetRoot + src.replace(/^\.?[\\/]+/, '');
+                var resolved = imageAssetRoot + src.replace(/^\.?[\\/]+/, '');
+                return resolved.replace(/\.(png|PNG)$/i, '.webp');
             }
 
             function resolveVideoAsset(src) {
@@ -694,6 +712,22 @@
                 btnStart.classList.add('show');
             }
 
+            function safePlay(video, label) {
+                video.currentTime = 0;
+                var promise = video.play();
+                if (promise) {
+                    promise.catch(function () {
+                        console.warn(label + ': play() 被拒绝，等待 canplay 后重试');
+                        video.addEventListener('canplay', function retry() {
+                            video.removeEventListener('canplay', retry);
+                            video.play().catch(function (e2) {
+                                console.warn(label + ': 重试仍失败', e2);
+                            });
+                        });
+                    });
+                }
+            }
+
             function enterMainMenu() {
                 if (introStage !== 'tap') return;
 
@@ -707,14 +741,17 @@
                 btnStart.classList.remove('fade-out');
                 videoWord.classList.remove('fade-out');
                 videoWord.pause();
-                videoWord.currentTime = 0;
-                videoBg.currentTime = 0;
-                videoBg.play().catch(function (e) {
-                    console.warn('背景视频播放失败:', e);
-                });
-                videoWord.play().catch(function (e) {
-                    console.warn('标题视频播放失败:', e);
-                });
+
+                safePlay(videoBg, '背景视频');
+                safePlay(videoWord, '标题视频');
+
+                // 安全兜底：如果 videoWord 15秒内未播完，直接显示开始按钮
+                setTimeout(function () {
+                    if (introStage === 'menu') {
+                        console.warn('videoWord 超时，直接显示开始按钮');
+                        finishMainMenuIntro();
+                    }
+                }, 15000);
             }
 
             // ---- 文字视频播完 → 出现开始按钮 ----
@@ -728,6 +765,7 @@
                 if (introStage !== 'menu-ready') return;
 
                 introStage = 'playing';
+                loadDialogueAssets();
                 videoWord.classList.add('fade-out');
                 btnStart.classList.add('fade-out');
 
@@ -756,8 +794,11 @@
                     videoScene.style.display = '';
                     videoScene.src = resolveVideoAsset(item.src);
                     videoScene.load();
-                    videoScene.play().catch(function (e) {
-                        console.warn('过场视频播放失败:', e);
+                    videoScene.addEventListener('canplay', function onReady() {
+                        videoScene.removeEventListener('canplay', onReady);
+                        videoScene.play().catch(function (e) {
+                            console.warn('过场视频播放失败:', e);
+                        });
                     });
                 } else if (item.type === 'image') {
                     videoScene.pause();
@@ -774,8 +815,11 @@
                                     videoScene.style.display = '';
                                     videoScene.src = resolveVideoAsset('5.mp4');
                                     videoScene.load();
-                                    videoScene.play().catch(function (e) {
-                                        console.warn('5.mp4播放失败:', e);
+                                    videoScene.addEventListener('canplay', function on5Ready() {
+                                        videoScene.removeEventListener('canplay', on5Ready);
+                                        videoScene.play().catch(function (e) {
+                                            console.warn('5.mp4播放失败:', e);
+                                        });
                                     });
                                 }, 1500);
                             }, 800);
@@ -961,6 +1005,7 @@
 
             // ---- 对话系统 ----
             function startDialogue() {
+                loadDialogueAssets();
                 dialogueActive = true;
                 dialogueIndex = 0;
                 dialogueLayer.classList.add('show');
@@ -1059,12 +1104,7 @@
                 }
             });
 
-            window.addEventListener('load', function () {
-                videoBg.pause();
-                videoWord.pause();
-                videoBg.currentTime = 0;
-                videoWord.currentTime = 0;
-            });
+            // 视频初始状态由 HTML 属性控制（无 autoplay），无需额外 pause
 
             // ===== 解谜系统 =====
             var puzzleState = {};
@@ -1079,8 +1119,8 @@
             var puzzleIntroText = '【我】我需要找找看，这个老倌到底把本子藏哪了？';
             var puzzleCgMap = {
                 cg_bookshelf: '第一章-解谜-书柜.jpg',
-                cg_drawer: '第一章-解谜-抽屉里的字条.png',
-                cg_nightstand: '第一章-解谜-床头柜-打开.png'
+                cg_drawer: '第一章-解谜-抽屉里的字条.webp',
+                cg_nightstand: '第一章-解谜-床头柜-打开.webp'
             };
             var notebookPages = [
                 {
@@ -1387,10 +1427,10 @@
                     candidates = [resolveImageAsset(src)];
                 } else {
                     candidates = [
-                        resolveImageAsset(src + '.png'),
+                        resolveImageAsset(src + '.webp'),
                         resolveImageAsset(src + '.jpg'),
                         resolveImageAsset(src + '.jpeg'),
-                        resolveImageAsset(src + '.webp')
+                        resolveImageAsset(src + '.png')
                     ];
                 }
 
